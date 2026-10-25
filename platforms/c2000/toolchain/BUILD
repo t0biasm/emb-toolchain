@@ -35,6 +35,8 @@ cc_toolchain_config_c2000(
 cc_toolchain(
     name = "c2000_cc_toolchain",
     all_files = ":compiler_binaries",
+    ar_files = ":compiler_binaries",
+    as_files = ":compiler_binaries",
     compiler_files = ":compiler_binaries",
     dwp_files = ":empty",
     linker_files = ":compiler_binaries",
