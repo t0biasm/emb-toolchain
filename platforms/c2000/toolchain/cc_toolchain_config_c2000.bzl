@@ -39,10 +39,18 @@ def _impl(ctx):
         ),
     ]
     # Build tool pathes
-    archiver = "../../../" + ctx.file._archiver.path
-    compiler = "../../../" + ctx.file._compiler.path
-    linker = "../../../" + ctx.file._linker.path
-    strip = "../../../" + ctx.file._strip.path
+    # tool paths are resolved relative to the package of the cc_toolchain, so the
+    # number of "../" depends on where this module lives (main repo vs. external
+    # repo when used as a dependency)
+    pkg_dir = ctx.label.package
+    if ctx.label.workspace_root:
+        pkg_dir = ctx.label.workspace_root + "/" + pkg_dir
+    up = "../" * len([p for p in pkg_dir.split("/") if p])
+
+    archiver = up + ctx.file._archiver.path
+    compiler = up + ctx.file._compiler.path
+    linker = up + ctx.file._linker.path
+    strip = up + ctx.file._strip.path
 
     action_configs = [
         action_config (

@@ -35,15 +35,23 @@ def _impl(ctx):
     # Builtin sysroot
     builtin_sysroot = None
     
+    # tool paths are resolved relative to the package of the cc_toolchain, so the
+    # number of "../" depends on where this module lives (main repo vs. external
+    # repo when used as a dependency)
+    pkg_dir = ctx.label.package
+    if ctx.label.workspace_root:
+        pkg_dir = ctx.label.workspace_root + "/" + pkg_dir
+    up = "../" * len([p for p in pkg_dir.split("/") if p])
+
     # Build tool pathes
-    gcc = "../../../" + ctx.executable.gcc.path
-    ld = "../../../" + ctx.executable.ld.path
-    ar = "../../../" + ctx.executable.ar.path
-    cpp = "../../../" + ctx.executable.cpp.path
-    gcov = "../../../" + ctx.executable.gcov.path
-    nm = "../../../" + ctx.executable.nm.path
-    objdump = "../../../" + ctx.executable.objdump.path
-    strip = "../../../" + ctx.executable.strip.path
+    gcc = up + ctx.executable.gcc.path
+    ld = up + ctx.executable.ld.path
+    ar = up + ctx.executable.ar.path
+    cpp = up + ctx.executable.cpp.path
+    gcov = up + ctx.executable.gcov.path
+    nm = up + ctx.executable.nm.path
+    objdump = up + ctx.executable.objdump.path
+    strip = up + ctx.executable.strip.path
 
     action_configs = [
         action_config (
