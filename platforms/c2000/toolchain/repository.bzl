@@ -8,17 +8,23 @@ def _c2000_toolchain_repository_impl(ctx):
     
     os_name = ctx.os.name
     os_arch = ctx.os.arch
+
+    base_url = ctx.getenv("EMB_ARTIFACTORY_URL")
+    if not base_url:
+        fail("EMB_ARTIFACTORY_URL is not set. Add to user.bazelrc: " +
+             "common --repo_env=EMB_ARTIFACTORY_URL=https://<host>/artifactory")
+    base_url = base_url.rstrip("/")
     
     # Platform-Erkennung und Download (wie vorher)       
     if os_name.startswith("windows"):
-        url = "https://artifactory.maierei.synology.me/artifactory/tools-local/compiler/cl2000/windows/ti-cgt-c2000_25.11.0.LTS.zip"
+        url = base_url + "/tools-local/compiler/cl2000/windows/ti-cgt-c2000_25.11.0.LTS.zip"
         sha256 = "6c8017bca7e1d18fce08403a42ed1a14a9bcead26df7dced3780ecd74ab21847"
         strip_prefix = "ti-cgt-c2000_25.11.0.LTS"
         platform_type = "windows"
         binary_extension = ".exe"
 
     elif os_name == "linux":
-        url = "https://artifactory.maierei.synology.me/artifactory/tools-local/compiler/cl2000/linux/ti-cgt-c2000_25.11.0.LTS.tar.gz"
+        url = base_url + "/tools-local/compiler/cl2000/linux/ti-cgt-c2000_25.11.0.LTS.tar.gz"
         sha256 = "90c9f281f91ccf6ebc712d445f0fa31e4460fad2b3268693842a79fbec2bf82a"
         strip_prefix = "ti-cgt-c2000_25.11.0.LTS"
         platform_type = "linux"
@@ -164,7 +170,7 @@ Toolchain URL: {url}
 c2000_toolchain_repository = repository_rule(
     implementation = _c2000_toolchain_repository_impl,
     local = False,
-    environ = ["PATH"],
+    environ = ["PATH", "EMB_ARTIFACTORY_URL"],
     attrs = {
         "auth_patterns": attr.string_dict(
         ),

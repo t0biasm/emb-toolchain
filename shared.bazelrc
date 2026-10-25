@@ -1,0 +1,21 @@
+# Shared Bazel configuration of emb-toolchain.
+# Import from the project's .bazelrc:
+#   import %workspace%/toolchain/emb-toolchain/shared.bazelrc
+#
+# Required per machine (user.bazelrc, gitignored) or CI:
+#   common --repo_env=EMB_ARTIFACTORY_URL=https://<host>/artifactory
+
+common --enable_bzlmod
+
+## ------ Platform Configurations ------
+# Texas Instruments C2000
+build:c2000 --platforms=@emb_toolchain//platforms/c2000/toolchain:c2000
+# Microchip/Atmel AVR 8-Bit (ATmega32U4)
+build:atmega32u4 --platforms=@emb_toolchain//platforms/avr8/toolchain:avr8
+build:atmega32u4 --@emb_toolchain//platforms/avr8/toolchain:mcu=atmega32u4
+build:atmega32u4 --@emb_toolchain//platforms/avr8/toolchain:p_arch=avr5
+build:atmega32u4 --@emb_toolchain//platforms/avr8/toolchain:f_cpu=16000000UL
+
+## ------ Unit Test Configurations ------
+# GCC for Windows (MinGW)
+build:gcc --platforms=@emb_toolchain//platforms/gcc/toolchain:gcc_windows

@@ -8,17 +8,23 @@ def _avr8_toolchain_repository_impl(ctx):
     
     os_name = ctx.os.name
     os_arch = ctx.os.arch
+
+    base_url = ctx.getenv("EMB_ARTIFACTORY_URL")
+    if not base_url:
+        fail("EMB_ARTIFACTORY_URL is not set. Add to user.bazelrc: " +
+             "common --repo_env=EMB_ARTIFACTORY_URL=https://<host>/artifactory")
+    base_url = base_url.rstrip("/")
     
     # Platform-Erkennung und Download (wie vorher)       
     if os_name.startswith("windows"):
-        url = "https://artifactory.maierei.synology.me/artifactory/tools-local/compiler/avr8/windows/avr8-gnu-toolchain-4.0.0.52-win32.any.x86_64.zip"
+        url = base_url + "/tools-local/compiler/avr8/windows/avr8-gnu-toolchain-4.0.0.52-win32.any.x86_64.zip"
         sha256 = "ccc9712ca20edc713dcf101013f80ba245b418ebfb02fc98e9f44f7733fe086a"
         strip_prefix = "avr8-gnu-toolchain-win32_x86_64"
         platform_type = "windows"
         binary_extension = ".exe"
 
     elif os_name == "linux":
-        url = "https://artifactory.maierei.synology.me/artifactory/tools-local/compiler/avr8/linux/avr8-gnu-toolchain-4.0.0.52-linux.any.x86_64.tar.gz"
+        url = base_url + "/tools-local/compiler/avr8/linux/avr8-gnu-toolchain-4.0.0.52-linux.any.x86_64.tar.gz"
         sha256 = "cc8682bb15f26428597499bf6e120832624a25b1062034a49fe0c77e4731cd33"
         strip_prefix = "avr8-gnu-toolchain-linux_x86_64"
         platform_type = "linux"
@@ -260,7 +266,7 @@ Toolchain URL: {url}
 avr8_toolchain_repository = repository_rule(
     implementation = _avr8_toolchain_repository_impl,
     local = False,
-    environ = ["PATH"],
+    environ = ["PATH", "EMB_ARTIFACTORY_URL"],
     attrs = {
         "auth_patterns": attr.string_dict(
         ),

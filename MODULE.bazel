@@ -1,0 +1,41 @@
+module(
+    name = "emb_toolchain",
+    version = "0.1.0",
+)
+
+bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "bazel_skylib", version = "1.8.2")
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+# --------------------- Compiler toolchains ---------------------- #
+# Downloaded from Artifactory; set EMB_ARTIFACTORY_URL via --repo_env
+# (see shared.bazelrc / README.md).
+c2000_toolchain = use_extension("//platforms/c2000/toolchain:extension.bzl", "c2000_toolchain_extension")
+use_repo(c2000_toolchain, "ti_cgt_c2000")
+
+avr8_toolchain = use_extension("//platforms/avr8/toolchain:extension.bzl", "avr8_toolchain_extension")
+use_repo(avr8_toolchain, "avr8_compiler")
+
+# LLVM (clang-format, clang-tidy), host-aware: Windows / Linux x86_64
+llvm_toolchain_ext = use_extension("//tools/llvm:extension.bzl", "llvm_toolchain_extension")
+use_repo(llvm_toolchain_ext, "llvm_toolchain")
+
+# GCC (unit-test toolchain, currently Windows/MSYS2 only)
+http_archive(
+    name = "gcc_toolchain",
+    urls = ["https://ftp.fu-berlin.de/unix/languages/gcc/releases/gcc-15.2.0/gcc-15.2.0.tar.xz"],
+    strip_prefix = "gcc-15.2.0",
+    sha256 = "438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e",
+    build_file = "//platforms/gcc/toolchain:gcc.BUILD",
+)
+
+# --------- Execution platforms and toolchains (honored in non-root modules) --------- #
+register_execution_platforms(
+    "//platforms:linux_x86_64_exec",
+    "//platforms:windows_x86_64_exec",
+)
+
+register_toolchains("//platforms/c2000/toolchain:c2000_toolchain")
+register_toolchains("//platforms/avr8/toolchain:avr8_toolchain")
+register_toolchains("//platforms/gcc/toolchain:gcc_toolchain_windows")
