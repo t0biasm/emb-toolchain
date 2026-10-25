@@ -6,7 +6,8 @@ def _cc_binary_c2000_impl(ctx):
     executable = ctx.actions.declare_file(ctx.attr.name)
 
     # Get tool for object dump
-    ofd2000 = ctx.file._ofd2000.dirname + "/" + ctx.file._ofd2000.basename
+    # Passing the File as executable also makes it an input of the action (sandbox)
+    ofd2000 = ctx.executable._ofd2000
 
     ## Fetch toolchain
     cc_toolchain = find_cpp_toolchain(ctx)
