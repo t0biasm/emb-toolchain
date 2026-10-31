@@ -70,6 +70,11 @@ def _cc_binary_c2000_impl(ctx):
         )
 
     # ------------ Link executable ------------ #
+    # The linker writes <executable>.map and <executable>_linkInfo.xml next to the
+    # output (see C2000_LINKER_FLAGS_APP). Declare them, otherwise the sandbox
+    # discards them.
+    map_file = ctx.actions.declare_file(ctx.attr.name + ".map")
+    link_info = ctx.actions.declare_file(ctx.attr.name + "_linkInfo.xml")
     linking_outputs = cc_common.link(
         name = ctx.attr.name,
         actions = ctx.actions,
@@ -79,6 +84,7 @@ def _cc_binary_c2000_impl(ctx):
         linking_contexts = [dep[CcInfo].linking_context for dep in ctx.attr.deps],
         user_link_flags = [f.path for f in ctx.files.additional_linker_inputs],
         additional_inputs = ctx.files.additional_linker_inputs,
+        additional_outputs = [map_file, link_info],
     )
 
     # ------------ Create object dump for elf file ------------ #
@@ -96,7 +102,7 @@ def _cc_binary_c2000_impl(ctx):
     )
 
     # Expose a DefaultInfo with the executable
-    default_info = DefaultInfo(files = depset([elfdmp] + objdmp_files),
+    default_info = DefaultInfo(files = depset([elfdmp, map_file] + objdmp_files),
                                executable = linking_outputs.executable)
 
     # Optionally, expose CcInfo including compilation outputs
